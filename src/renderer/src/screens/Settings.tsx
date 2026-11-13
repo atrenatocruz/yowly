@@ -111,6 +111,7 @@ export default function Settings({ st, set, dialog, toast }: Ctx) {
     <section className="screen">
       <h1>Settings</h1>
 
+      <div className="card">
       <h2>Dictation</h2>
       <div className="grid2">
         <label className="field">
@@ -154,6 +155,8 @@ export default function Settings({ st, set, dialog, toast }: Ctx) {
       </Toggle>
       {!st.canPaste && <p className="warn small">Direct insertion isn't available on this system, so text is copied to the clipboard instead.</p>}
 
+      </div>
+      <div className="card">
       <h2>Transcription</h2>
       <div className="grid2">
         <label className="field">
@@ -172,6 +175,8 @@ export default function Settings({ st, set, dialog, toast }: Ctx) {
         </div>
       </div>
 
+      </div>
+      <div className="card">
       <h2>Text cleanup</h2>
       <p className="muted small">Runs on this device, always free.</p>
       <Toggle on={s.cleanup.fillers} onChange={(v) => void set({ cleanup: { ...s.cleanup, fillers: v } })}>
@@ -184,6 +189,8 @@ export default function Settings({ st, set, dialog, toast }: Ctx) {
         Fix capitalization and end punctuation
       </Toggle>
 
+      </div>
+      <div className="card">
       <h2>Transformations</h2>
       <ul className="list compact">
         {s.transforms.map((t) => (
@@ -215,6 +222,8 @@ export default function Settings({ st, set, dialog, toast }: Ctx) {
         </button>
       </form>
 
+      </div>
+      <div className="card">
       <h2>Privacy and data</h2>
       <table>
         <thead>
@@ -279,6 +288,8 @@ export default function Settings({ st, set, dialog, toast }: Ctx) {
         </div>
       </div>
 
+      </div>
+      <div className="card">
       <h2>Appearance</h2>
       <div className="grid2">
         <label className="field">
@@ -297,6 +308,7 @@ export default function Settings({ st, set, dialog, toast }: Ctx) {
             <option value={1.3}>Extra large</option>
           </select>
         </label>
+      </div>
       </div>
     </section>
   )

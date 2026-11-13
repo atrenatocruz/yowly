@@ -38,8 +38,9 @@ Text on the gradient is near-black (`#1b1206`) for contrast. Orange as text uses
 ## Spacing and shape
 
 - Spacing: 4, 8, 12, 16, 24, 40 px.
-- Radius: 9 px controls, 12 px cards, 16 px dialogs, full pill for chips and primary CTA.
-- Content column: 780 px max. Sidebar: 212 px.
+- Radius: 12 px controls, 22 px cards, 16 px dialogs, full pill for chips.
+- Layout: a floating 64 px icon rail on the left, soft borderless cards on a dark canvas, and on Dictate a 264 px right-hand panel (Start dictation, hotkey, weekly activity, monthly spend).
+- Elevation: one shared soft shadow (`--lift`); inputs sit inset on cards using the canvas colour.
 
 ## Components
 

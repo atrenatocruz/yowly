@@ -115,18 +115,16 @@ export default function App() {
   return (
     <div className="shell">
       <nav className="side" aria-label="Main">
-        <div className="brand">
-          <Mascot state={mascot} size={34} />
-          <span>Yowly</span>
+        <div className="brand" title="Yowly">
+          <Mascot state={mascot} size={30} />
         </div>
         {ROUTES.map((r, i) => (
-          <a key={r} href={`#/${r}`} className={route === r ? 'nav on' : 'nav'} aria-current={route === r ? 'page' : undefined}>
-            {LABEL[r]}
-            <kbd>{i + 1}</kbd>
+          <a key={r} href={`#/${r}`} className={route === r ? 'nav on' : 'nav'} aria-current={route === r ? 'page' : undefined} aria-label={LABEL[r]} title={`${LABEL[r]} (Ctrl+${i + 1})`}>
+            <Icon name={r} />
           </a>
         ))}
-        <button className="nav palette-btn" onClick={() => setPalette(true)}>
-          Commands <kbd>Ctrl K</kbd>
+        <button className="nav palette-btn" onClick={() => setPalette(true)} aria-label="Commands" title="Commands (Ctrl+K)">
+          <Icon name="commands" />
         </button>
       </nav>
       <main className="content">
@@ -149,6 +147,45 @@ export default function App() {
         ))}
       </div>
     </div>
+  )
+}
+
+const ICONS: Record<string, ReactNode> = {
+  dictate: (
+    <>
+      <path d="M12 3a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3Z" />
+      <path d="M5 11a7 7 0 0 0 14 0M12 18v3" />
+    </>
+  ),
+  history: (
+    <>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M12 7v5l3 2" />
+    </>
+  ),
+  models: <path d="M12 3 3 8l9 5 9-5-9-5ZM3 13l9 5 9-5" />,
+  usage: <path d="M5 20V11M12 20V4M19 20v-6" />,
+  settings: (
+    <>
+      <path d="M4 6h8M18 6h2M4 12h2M12 12h8M4 18h10M20 18h0" />
+      <circle cx="15" cy="6" r="2.2" />
+      <circle cx="9" cy="12" r="2.2" />
+      <circle cx="17" cy="18" r="2.2" />
+    </>
+  ),
+  commands: (
+    <>
+      <circle cx="11" cy="11" r="7" />
+      <path d="m20 20-4-4" />
+    </>
+  ),
+}
+
+export function Icon({ name }: { name: string }) {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      {ICONS[name]}
+    </svg>
   )
 }
 

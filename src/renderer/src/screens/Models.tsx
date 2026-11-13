@@ -60,6 +60,7 @@ export default function Models({ st, set, toast }: Ctx) {
         </button>
       </header>
 
+      <div className="card">
       <h2>Default agent</h2>
       <div className="row wrap">
         <ModelSelect models={st.models} value={s.modelId} onChange={(id) => void set({ modelId: id })} />
@@ -68,6 +69,8 @@ export default function Models({ st, set, toast }: Ctx) {
         </span>
       </div>
 
+      </div>
+      <div className="card">
       <h2>Presets</h2>
       <div className="grid2">
         {(Object.keys(PRESET_NAMES) as PresetId[]).map((p) => (
@@ -82,12 +85,16 @@ export default function Models({ st, set, toast }: Ctx) {
         ))}
       </div>
 
+      </div>
+      <div className="card">
       <h2>API keys</h2>
       <p className="muted small">Keys are encrypted by your operating system and never written to config files or logs. OpenRouter is all you need for the Free and Paid lists.</p>
       {CLOUD.map((p) => (
         <KeyRow key={p} provider={p} has={!!st.keys[p]} />
       ))}
 
+      </div>
+      <div className="card">
       <h2>All models</h2>
       <table>
         <thead>
@@ -116,6 +123,7 @@ export default function Models({ st, set, toast }: Ctx) {
           ))}
         </tbody>
       </table>
+      </div>
     </section>
   )
 }

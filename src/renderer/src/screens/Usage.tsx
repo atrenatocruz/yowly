@@ -54,6 +54,7 @@ export default function Usage({ st, set }: Ctx) {
         ))}
       </div>
 
+      <div className="card">
       <h2>Monthly cap</h2>
       {cap > 0 ? (
         <>
@@ -82,6 +83,8 @@ export default function Usage({ st, set }: Ctx) {
         When the cap is reached, switch to a free or local model automatically (you'll see a notice)
       </Toggle>
 
+      </div>
+      <div className="card">
       <h2>Recent activity</h2>
       {!recent.length ? (
         <p className="muted">Nothing yet. Local dictation and cleanup are always free.</p>
@@ -111,6 +114,7 @@ export default function Usage({ st, set }: Ctx) {
           </tbody>
         </table>
       )}
+      </div>
     </section>
   )
 }

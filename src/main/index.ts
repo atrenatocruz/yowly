@@ -61,8 +61,8 @@ const overlay = () =>
 
 function createWindows() {
   mainWin = new BrowserWindow({
-    width: 1080,
-    height: 740,
+    width: 1200,
+    height: 800,
     minWidth: 860,
     minHeight: 560,
     show: false,

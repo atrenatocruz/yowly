@@ -1,9 +1,9 @@
 import { useEffect, useRef, useState } from 'react'
-import { estimate, usd } from '../../../core/cost'
+import { estimate, spend, usd } from '../../../core/cost'
 import { isCloud, isPaid, PRESET_NAMES, PROVIDERS } from '../../../core/models'
 import { AGENT_SYSTEM, agentUser } from '../../../core/settings'
 import { ERROR_TEXT, type ErrorCode, type Model, type ModelLabel, type PresetId } from '../../../core/types'
-import { prettyKey, type Ctx } from '../App'
+import { Icon, prettyKey, type Ctx } from '../App'
 import { api } from '../bridge'
 import Mascot from '../Mascot'
 
@@ -144,6 +144,20 @@ export default function Dictate(ctx: Ctx) {
     p === 'private' ? model?.provider === 'ollama' : s.presets[p] === s.modelId,
   )
 
+  // Last 7 days of dictations, oldest first, for the activity card.
+  const week = Array.from({ length: 7 }, (_, i) => {
+    const d = new Date()
+    d.setHours(0, 0, 0, 0)
+    d.setDate(d.getDate() - (6 - i))
+    return d
+  })
+  const counts = week.map((d) => st.history.filter((h) => h.ts >= d.getTime() && h.ts < d.getTime() + 864e5).length)
+  const top = Math.max(1, ...counts)
+  const points = counts.map((c, i) => `${10 + i * 30},${50 - (c / top) * 40}`).join(' ')
+  const month = spend(st.usage).month
+  const cap = s.monthlyCapUsd
+  const pct = cap > 0 ? Math.min(100, (month / cap) * 100) : 0
+
   return (
     <section
       className="screen dictate"
@@ -152,99 +166,146 @@ export default function Dictate(ctx: Ctx) {
         if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === 'c') void copy()
       }}
     >
-      <header className="hero">
-        <Mascot state={mascot} size={72} />
-        <div>
-          <h1>{STATUS[mascot]}</h1>
-          <p className="muted">
-            Press <kbd>{prettyKey(s.hotkey, st.platform)}</kbd> {s.mode === 'ptt' ? 'and hold to talk' : 'to start and stop'}
-            {!st.hotkeyOk && <span className="warn"> · hotkey is taken by another app, change it in Settings</span>}
-          </p>
+      <div className="col">
+        <header className="hero">
+          <Mascot state={mascot} size={46} />
+          <div>
+            <h1>{STATUS[mascot]}</h1>
+            <p className="muted small">Edit your words, hand them to an agent, then insert.</p>
+          </div>
+        </header>
+
+        <div className="card editor-card">
+          <textarea
+            ref={area}
+            className="editor"
+            value={draft}
+            placeholder="Your words land here."
+            onChange={(e) => setDraft(e.target.value)}
+            aria-label="Transcript"
+          />
+          <div className="row end">
+            {prev !== null && (
+              <button
+                className="btn ghost"
+                onClick={() => {
+                  setDraft(prev)
+                  setPrev(null)
+                }}
+              >
+                Undo
+              </button>
+            )}
+            <button className="btn" onClick={copy} disabled={!draft.trim()}>
+              Copy <kbd>Ctrl ⇧ C</kbd>
+            </button>
+            <button className="btn primary" onClick={insert} disabled={!draft.trim()}>
+              {st.canPaste ? 'Insert' : 'Copy to paste'} <kbd>Ctrl ↵</kbd>
+            </button>
+          </div>
         </div>
-        <button className="btn primary big" onClick={() => api.invoke('dictation:toggle')}>
-          {mascot === 'listening' ? 'Stop' : 'Dictate'}
-        </button>
-      </header>
 
-      <textarea
-        ref={area}
-        className="editor"
-        value={draft}
-        placeholder="Your words land here. Edit freely, then insert or hand them to an agent."
-        onChange={(e) => setDraft(e.target.value)}
-        aria-label="Transcript"
-      />
-
-      <div className="row wrap">
-        {s.transforms.map((t) => (
-          <button key={t.id} className="chip" disabled={busy} onClick={() => void run(t.instruction)}>
-            {t.name}
-          </button>
-        ))}
-        {prev !== null && (
-          <button
-            className="chip ghost"
-            onClick={() => {
-              setDraft(prev)
-              setPrev(null)
+        <div className="card">
+          <h2>Transform</h2>
+          <div className="row wrap">
+            {s.transforms.map((t) => (
+              <button key={t.id} className="chip" disabled={busy} onClick={() => void run(t.instruction)}>
+                {t.name}
+              </button>
+            ))}
+          </div>
+          <form
+            className="row askrow"
+            onSubmit={(e) => {
+              e.preventDefault()
+              if (ask.trim()) void run(ask.trim())
             }}
           >
-            Undo
-          </button>
-        )}
-      </div>
-
-      <form
-        className="row"
-        onSubmit={(e) => {
-          e.preventDefault()
-          if (ask.trim()) void run(ask.trim())
-        }}
-      >
-        <input className="grow" placeholder="Or tell the agent what to do with this text…" value={ask} onChange={(e) => setAsk(e.target.value)} aria-label="Custom instruction" />
-        <button className="btn" disabled={busy || !ask.trim()}>
-          {busy ? 'Working…' : 'Run'}
-        </button>
-      </form>
-
-      <div className="agentbar">
-        <div className="row wrap">
-          {(Object.keys(PRESET_NAMES) as PresetId[]).map((p) => (
-            <button key={p} className={activePreset === p ? 'seg on' : 'seg'} onClick={() => preset(p)}>
-              {PRESET_NAMES[p]}
+            <input className="grow" placeholder="Or tell the agent what to do with this text…" value={ask} onChange={(e) => setAsk(e.target.value)} aria-label="Custom instruction" />
+            <button className="btn" disabled={busy || !ask.trim()}>
+              {busy ? 'Working…' : 'Run'}
             </button>
-          ))}
-          <span className="row pick">
+          </form>
+        </div>
+
+        <div className="card agentbar">
+          <div className="row wrap">
+            <h2 className="grow">Agent</h2>
             {model && <span className={`tag t-${model.label.replace(' ', '')}`}>{model.label}</span>}
             <ModelSelect models={st.models} value={s.modelId} onChange={(id) => void set({ modelId: id })} />
-          </span>
+          </div>
+          <div className="segs">
+            {(Object.keys(PRESET_NAMES) as PresetId[]).map((p) => (
+              <button key={p} className={activePreset === p ? 'seg on' : 'seg'} onClick={() => preset(p)}>
+                {PRESET_NAMES[p]}
+              </button>
+            ))}
+          </div>
+          <p className="muted small">
+            {!model
+              ? 'No model selected.'
+              : !isPaid(model)
+                ? isCloud(model)
+                  ? 'Free model. No charge.'
+                  : 'Runs on this device. Nothing leaves your computer.'
+                : est
+                  ? `Estimate per action: ${usd(est.cost)} (about ${est.inTokens} tokens in, ${est.outTokens} out)`
+                  : `${usd(model.inPerM)} in / ${usd(model.outPerM)} out per 1M tokens`}
+            {last && (
+              <>
+                {' · '}Last run: {last.modelName}, {last.inTokens} in / {last.outTokens} out, <b>{usd(last.cost)}</b>
+              </>
+            )}
+          </p>
         </div>
-        <p className="muted small">
-          {!model
-            ? 'No model selected.'
-            : !isPaid(model)
-              ? isCloud(model)
-                ? 'Free model. No charge.'
-                : 'Runs on this device. Nothing leaves your computer.'
-              : est
-                ? `Estimate per action: ${usd(est.cost)} (about ${est.inTokens} tokens in, ${est.outTokens} out)`
-                : `${usd(model.inPerM)} in / ${usd(model.outPerM)} out per 1M tokens`}
-          {last && (
-            <>
-              {' · '}Last run: {last.modelName}, {last.inTokens} in / {last.outTokens} out, <b>{usd(last.cost)}</b>
-            </>
-          )}
-        </p>
       </div>
 
-      <footer className="row end">
-        <button className="btn" onClick={copy} disabled={!draft.trim()}>
-          Copy <kbd>Ctrl ⇧ C</kbd>
+      <aside className="rail" aria-label="Dictation">
+        <button className="cta" onClick={() => api.invoke('dictation:toggle')}>
+          <span className="cta-icon">
+            <Icon name="dictate" />
+          </span>
+          {mascot === 'listening' ? 'Stop dictation' : 'Start dictation'}
         </button>
-        <button className="btn primary" onClick={insert} disabled={!draft.trim()}>
-          {st.canPaste ? 'Insert' : 'Copy to paste'} <kbd>Ctrl ↵</kbd>
-        </button>
-      </footer>
+
+        <div className="hint">
+          <kbd>{prettyKey(s.hotkey, st.platform)}</kbd>
+          <span>{s.mode === 'ptt' ? 'Hold anywhere to talk' : 'Press anywhere to start and stop'}</span>
+          {!st.hotkeyOk && <span className="warn">This hotkey is taken by another app. Change it in Settings.</span>}
+        </div>
+
+        <div className="stat">
+          <strong>{counts.reduce((a, b) => a + b, 0)}</strong>
+          <span>Dictations this week</span>
+          <svg viewBox="0 0 200 58" aria-hidden="true">
+            <polyline points={points} fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+            <circle cx={190} cy={50 - (counts[6] / top) * 40} r="4" fill="#fff" />
+          </svg>
+          <div className="days">
+            {week.map((d) => (
+              <span key={d.getTime()}>{d.toLocaleDateString(undefined, { weekday: 'narrow' })}</span>
+            ))}
+          </div>
+        </div>
+
+        <div className="card spendcard">
+          <span className="muted small">Spent this month</span>
+          <strong>{usd(month)}</strong>
+          {cap > 0 ? (
+            <>
+              <div className={pct >= 100 ? 'meter full' : pct >= 80 ? 'meter near' : 'meter'}>
+                <i style={{ width: `${pct}%` }} />
+              </div>
+              <span className="muted small">of your {usd(cap)} cap</span>
+            </>
+          ) : (
+            <span className="warn small">No cap set</span>
+          )}
+          <button className="btn" onClick={() => go('usage')}>
+            Usage and limits
+          </button>
+        </div>
+      </aside>
     </section>
   )
 }
