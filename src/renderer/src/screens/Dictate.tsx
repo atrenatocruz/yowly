@@ -214,9 +214,10 @@ export default function Dictate(ctx: Ctx) {
               {PRESET_NAMES[p]}
             </button>
           ))}
-          <span className="grow" />
-          {model && <span className={`tag t-${model.label.replace(' ', '')}`}>{model.label}</span>}
-          <ModelSelect models={st.models} value={s.modelId} onChange={(id) => void set({ modelId: id })} />
+          <span className="row pick">
+            {model && <span className={`tag t-${model.label.replace(' ', '')}`}>{model.label}</span>}
+            <ModelSelect models={st.models} value={s.modelId} onChange={(id) => void set({ modelId: id })} />
+          </span>
         </div>
         <p className="muted small">
           {!model

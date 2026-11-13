@@ -1,10 +1,10 @@
-# Yowly: design system and mascot
+# Yowly: design system and brand mark
 
 The live source of truth is `src/renderer/src/styles.css` (tokens at the top) and `src/renderer/src/Mascot.tsx`.
 
 ## Principles
 
-1. Calm surface, lively mascot. Only the owl and the primary action are orange.
+1. Calm surface, lively mark. Only the Yowly mark and the primary action are orange.
 2. Typography leads. Few borders, no decorative chrome.
 3. Keyboard first. Everything reachable without a mouse.
 4. Honest states. Cost, privacy and errors are always said in plain words.
@@ -50,28 +50,30 @@ Tag (Free / Local / Paid / BYO key) · Tile · Meter · Table · List item · Di
 
 - Visible 2 px orange focus ring on every interactive element.
 - `prefers-reduced-motion` turns off all animation.
-- Status changes use `aria-live`. Dialogs are `aria-modal`. Mascot has a text label per state.
+- Status changes use `aria-live`. Dialogs are `aria-modal`. The mark has a text label per state.
 - Light and dark both keep body text and orange text above 4.5:1.
 
-## Mascot: Yowly the owl
+## Brand mark: the voice-wave Y
 
-**Concept.** A compact, round owl. Its crest is five rounded bars, a voice waveform, so the brand idea (speech becomes clear thought) is in the silhouette. Big glossy eyes on a soft cream face carry all expression. Blush cheeks keep it warm. A small waveform mark sits on the chest.
+**Concept.** Five rounded vertical bars, a voice waveform, that step down toward the middle so together they read as the letter Y. Speech (the wave) becomes something clear (a letter). It is an abstract symbol with no face or character.
 
-**Shape rules.** Rounded body, two small soft ear tufts, crest between them. Orange gradient body, cream face disc, large dark pupils with a white highlight, pink cheeks. No outlines and no dark mask, so it reads friendly and stays legible at 16 px.
+**Shape rules.** Five bars of equal width with fully rounded ends, mirrored left to right. The centre bar is the longest and sits lowest. One orange gradient runs across the whole mark. No outline, no container, no extra shapes, so it stays legible at 16 px.
 
-**States**
+**States.** With no face, motion alone carries the state.
 
-| State | Eyes | Crest | Extra |
-|---|---|---|---|
-| Idle / sleeping | closed, relaxed arcs | low, still | small fading "z" |
-| Listening | wide, large pupils | bouncing with the voice | pill border turns orange |
-| Thinking | pupils up and to the side | slow wave | two rising dots |
-| Transcribing | looking down, flat focused brows | fast wave | sound arcs at both sides |
-| Success | happy upward arcs | full height | one small hop |
-| Error | worried brows, looking down | drooped | desaturated, never red |
+| State | Motion |
+|---|---|
+| Idle | still, slightly dimmed |
+| Listening | bars bounce in a slow wave |
+| Thinking | bars fade in and out in sequence |
+| Transcribing | bars bounce in a fast wave |
+| Success | whole mark pops once, full brightness |
+| Error | bars shrink and turn warm grey, never red |
+
+All motion stops under `prefers-reduced-motion`; state is then shown by the text beside the mark.
 
 **Where it appears.** Sidebar brand (34 px, mirrors live state) · Dictate header (72 px) · recording pill (52 px) · empty states (96 px) · welcome (84 px) · tray and window icon (rasterized from the same SVG).
 
-**App icon direction.** The owl's head and crest, centered on a warm charcoal rounded square (`#1c1a18`), orange gradient body. For the menu bar: a one-color template version of the same silhouette (head outline + five crest bars). Export sizes: 16, 32, 64, 128, 256, 512, 1024.
+**App icon direction.** The mark centred on a warm charcoal rounded square (`#1c1a18`). For the macOS menu bar: the same five bars as a one-colour template image. Export sizes: 16, 32, 64, 128, 256, 512, 1024.
 
-**Don'ts.** No starburst or spark shapes, no abstract "AI orb", no terracotta, no serif wordmark. Yowly is always a character with a face.
+**Don'ts.** Do not add a face, eyes or a character. Do not rotate, outline or recolour the mark outside the orange gradient, white or near-black. No starburst or spark shapes, no terracotta.

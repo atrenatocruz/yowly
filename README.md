@@ -26,7 +26,7 @@ npm run dev
 |---|---|
 | `src/core` | Portable logic: cleanup, cost and cap rules, model catalog, providers |
 | `src/main` | Electron shell: hotkeys, insertion, keychain, storage, orchestration |
-| `src/renderer` | React UI, mascot, recording pill, on-device Whisper worker |
+| `src/renderer` | React UI, brand mark, recording pill, on-device Whisper worker |
 | `docs` | Product brief, design system, architecture and plan, security checklist |
 
 ## Website

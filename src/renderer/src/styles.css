@@ -146,7 +146,8 @@ input.recording { border-color: var(--accent); color: var(--accent-text); }
 .hero > div { flex: 1; }
 .editor { flex: 1; min-height: 190px; resize: none; padding: var(--s4); border-radius: var(--radius); font-size: 1.05rem; line-height: 1.65; }
 .agentbar { padding: var(--s3) var(--s4); border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); }
-.agentbar select { max-width: 270px; }
+.agentbar .pick { margin-left: auto; }
+.agentbar select { max-width: 230px; }
 .agentbar p { margin: var(--s2) 0 0; }
 
 /* lists, tables, tiles */
@@ -211,22 +212,19 @@ ul.plain li { margin: var(--s2) 0; }
 .pill-btn.primary { background: linear-gradient(135deg, #ff6a0d, #ffab3d); border-color: transparent; color: #1b1206; font-weight: 700; }
 .pill-btn.wide { width: auto; padding: 0 14px; border-radius: 999px; }
 
-/* mascot motion */
+/* mark motion: the bars alone show the state */
 .mascot { flex: none; overflow: visible; }
-.m-bar { transform-box: fill-box; transform-origin: center bottom; transition: transform 0.25s; }
-.m-idle .m-bar, .m-error .m-bar { transform: scaleY(0.45); }
-.m-error .m-body, .m-error .m-crest { filter: saturate(0.55); }
+.m-bar { transform-box: fill-box; transform-origin: center; transition: transform 0.25s, opacity 0.25s; }
+.m-idle .m-bar { opacity: 0.85; }
+.m-error .m-bar { transform: scaleY(0.7); }
 .m-listening .m-bar { animation: bar 0.7s ease-in-out infinite alternate; }
-.m-transcribing .m-bar { animation: bar 0.45s ease-in-out infinite alternate; }
-.m-thinking .m-bar { animation: bar 1.4s ease-in-out infinite alternate; }
+.m-transcribing .m-bar { animation: bar 0.4s ease-in-out infinite alternate; }
+.m-thinking .m-bar { animation: pulse 1.2s ease-in-out infinite; }
 .m-bar.b1 { animation-delay: -0.15s; } .m-bar.b2 { animation-delay: -0.3s; } .m-bar.b3 { animation-delay: -0.45s; } .m-bar.b4 { animation-delay: -0.6s; }
-.m-waves { animation: pulse 0.9s ease-in-out infinite; }
-.m-dots { animation: pulse 1.3s ease-in-out infinite; }
-.m-zz { animation: pulse 2.6s ease-in-out infinite; }
-.m-success .m-body { animation: hop 0.45s ease-out; transform-box: fill-box; transform-origin: center bottom; }
-@keyframes bar { from { transform: scaleY(0.35); } to { transform: scaleY(1.15); } }
+.m-success { animation: pop 0.45s ease-out; }
+@keyframes bar { from { transform: scaleY(0.55); } to { transform: scaleY(1.12); } }
 @keyframes pulse { 0%, 100% { opacity: 0.25; } 50% { opacity: 1; } }
-@keyframes hop { 40% { transform: translateY(-5px); } }
+@keyframes pop { 40% { transform: scale(1.14); } }
 @keyframes rise { from { opacity: 0; transform: translateY(6px); } }
 
 @media (prefers-reduced-motion: reduce) {
