@@ -196,6 +196,7 @@ const insertedText = (how: 'pasted' | 'clipboard') =>
 
 async function onTranscript(raw: string, seconds: number) {
   phase = 'idle'
+  if (process.env.YOWLY_E2E) console.log(`[e2e] transcript (${seconds.toFixed(1)}s): ${JSON.stringify(raw)}`)
   const text = cleanup(raw, settings.cleanup)
   if (!text) return pillShow('error', "Didn't catch that", 2200)
   const item: HistoryItem = { id: crypto.randomUUID(), ts: Date.now(), raw, text, seconds, engine }
@@ -389,7 +390,13 @@ function ipc() {
 // ---------- boot ----------
 
 // Smoke-check runs use a throwaway profile so they never touch real data.
-if (process.env.YOWLY_SHOT) app.setPath('userData', join(process.env.YOWLY_SHOT, 'profile'))
+const TEST_DIR = process.env.YOWLY_SHOT || process.env.YOWLY_E2E
+if (TEST_DIR) app.setPath('userData', join(TEST_DIR, 'profile'))
+// End-to-end check: YOWLY_E2E=<dir> YOWLY_FAKE_AUDIO=<wav> plays the file as the microphone.
+if (process.env.YOWLY_FAKE_AUDIO) {
+  app.commandLine.appendSwitch('use-fake-device-for-media-stream')
+  app.commandLine.appendSwitch('use-file-for-fake-audio-capture', `${process.env.YOWLY_FAKE_AUDIO}%noloop`)
+}
 if (!app.requestSingleInstanceLock()) app.quit()
 app.on('second-instance', showMain)
 app.on('before-quit', () => (quitting = true))
@@ -422,4 +429,16 @@ app.whenReady().then(async () => {
   registerHotkey()
   void refreshOllama()
   if (process.env.YOWLY_SHOT) void devShots(mainWin, pill, process.env.YOWLY_SHOT)
+  if (process.env.YOWLY_E2E) {
+    pill.webContents.on('console-message', (e) => console.log('[pill]', e.message))
+    ipcMain.on('pill:fail', () => console.log('[e2e] pill reported failure'))
+    ipcMain.on('pill:stopClick', () => console.log('[e2e] stop button click received'))
+    ipcMain.on('pill:cancelClick', () => console.log('[e2e] cancel button click received'))
+    setTimeout(() => {
+      startDictation()
+      console.log('[e2e] recording; pill bounds', JSON.stringify(pill.getBounds()))
+      // With YOWLY_E2E_CLICK the test waits for a real click on the pill instead.
+      if (!process.env.YOWLY_E2E_CLICK) setTimeout(stopDictation, 7000)
+    }, 4000)
+  }
 })

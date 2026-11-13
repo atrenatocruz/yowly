@@ -53,9 +53,10 @@ export default function Pill() {
   const cfg = useRef({ language: 'en', engine: 'local' as SttEngine })
 
   useEffect(() => {
-    const fail = (code: ErrorCode) => {
+    let micName = ''
+    const fail = (code: ErrorCode, mic = '') => {
       setState('error')
-      setMsg(ERROR_TEXT[code])
+      setMsg(ERROR_TEXT[code] + (mic ? ` Mic: ${mic}` : ''))
       api.send('pill:fail')
     }
 
@@ -82,6 +83,9 @@ export default function Pill() {
         return fail(name === 'NotAllowedError' ? 'mic_denied' : 'no_mic')
       }
       const audio = new AudioContext()
+      void audio.resume() // a window that was never clicked starts with audio suspended
+      micName = stream.getAudioTracks()[0]?.label.replace(/\s*\([0-9a-f]{4}:[0-9a-f]{4}\)$/i, '') ?? ''
+      if (!c.notice && micName) setMsg(`Listening… ${micName}`)
       const analyser = audio.createAnalyser()
       analyser.fftSize = 256
       audio.createMediaStreamSource(stream).connect(analyser)
@@ -114,8 +118,13 @@ export default function Pill() {
         const blob = new Blob(s.chunks, { type: s.rec.mimeType })
         const pcm = await toPcm16k(blob)
         const seconds = pcm.length / 16000
+        const level = rms(pcm)
+        const peak = pcm.reduce((m, v) => Math.max(m, Math.abs(v)), 0)
+        console.log(`audio ${seconds.toFixed(2)}s rms=${level.toFixed(4)} peak=${peak.toFixed(3)} mic=${micName}`)
         if (seconds < 0.4) return fail('too_short')
-        if (rms(pcm) < 0.004) return fail('silence')
+        if (level < 0.004 || peak < 0.02) return fail('silence', micName)
+        // Quiet microphones: bring the level up so the speech model hears it properly.
+        if (peak < 0.5) for (let i = 0; i < pcm.length; i++) pcm[i] *= 0.9 / peak
         let text: string
         if (cfg.current.engine === 'local') {
           text = await localTranscribe(pcm, cfg.current.language, setMsg)
@@ -124,6 +133,8 @@ export default function Pill() {
           if (r.error) return fail(r.error)
           text = r.text
         }
+        // Speech models invent a word or two ("You.") when given near-silence.
+        if (level < 0.01 && text.trim().split(/\s+/).length <= 2) return fail('silence', micName)
         api.send('pill:result', { text, seconds })
       } catch (e) {
         console.error(e)
@@ -184,16 +195,16 @@ export default function Pill() {
       </div>
       {state === 'listening' && (
         <>
-          <button className="pill-btn" title="Cancel (Esc)" aria-label="Cancel" onClick={() => api.send('pill:cancelClick')}>
+          <button className="pill-btn" title="Cancel (Esc)" aria-label="Cancel" onPointerDown={() => api.send('pill:cancelClick')}>
             ✕
           </button>
-          <button className="pill-btn primary" title="Finish" aria-label="Finish" onClick={() => api.send('pill:stopClick')}>
+          <button className="pill-btn primary" title="Finish" aria-label="Finish" onPointerDown={() => api.send('pill:stopClick')}>
             ✓
           </button>
         </>
       )}
       {state === 'error' && (
-        <button className="pill-btn primary wide" onClick={() => api.send('pill:retry')}>
+        <button className="pill-btn primary wide" onPointerDown={() => api.send('pill:retry')}>
           Retry
         </button>
       )}

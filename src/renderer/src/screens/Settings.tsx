@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { CLOUD_STT } from '../../../core/models'
 import { LANGUAGES } from '../../../core/settings'
 import type { SttEngine } from '../../../core/types'
@@ -27,6 +27,59 @@ function HotkeyInput({ value, platform, onChange }: { value: string; platform: s
         e.currentTarget.blur()
       }}
     />
+  )
+}
+
+/** Live input level, so the user can see which microphone actually hears them. */
+function MicTest({ micId }: { micId: string }) {
+  const [on, setOn] = useState(false)
+  const [err, setErr] = useState('')
+  const fill = useRef<HTMLElement>(null)
+  useEffect(() => {
+    if (!on) return
+    let raf = 0
+    let stream: MediaStream | undefined
+    const ctx = new AudioContext()
+    navigator.mediaDevices
+      .getUserMedia({ audio: micId ? { deviceId: { exact: micId } } : true })
+      .then((s) => {
+        stream = s
+        const an = ctx.createAnalyser()
+        ctx.createMediaStreamSource(s).connect(an)
+        const buf = new Float32Array(an.fftSize)
+        const tick = () => {
+          an.getFloatTimeDomainData(buf)
+          const peak = buf.reduce((m, v) => Math.max(m, Math.abs(v)), 0)
+          if (fill.current) fill.current.style.width = `${Math.min(100, peak * 160)}%`
+          raf = requestAnimationFrame(tick)
+        }
+        tick()
+      })
+      .catch(() => {
+        setErr('Could not open this microphone. Check Windows privacy settings.')
+        setOn(false)
+      })
+    return () => {
+      cancelAnimationFrame(raf)
+      stream?.getTracks().forEach((t) => t.stop())
+      void ctx.close()
+    }
+  }, [on, micId])
+  return (
+    <div className="mictest">
+      <button className="btn" onClick={() => (setErr(''), setOn(!on))}>
+        {on ? 'Stop test' : 'Test microphone'}
+      </button>
+      {on && (
+        <>
+          <div className="meter grow" aria-label="Microphone input level">
+            <i ref={fill} style={{ width: 0 }} />
+          </div>
+          <span className="muted small">Speak: the bar should jump past halfway.</span>
+        </>
+      )}
+      {err && <span className="warn small">{err}</span>}
+    </div>
   )
 }
 
@@ -95,6 +148,7 @@ export default function Settings({ st, set, dialog, toast }: Ctx) {
           </select>
         </label>
       </div>
+      <MicTest micId={s.micId} />
       <Toggle on={s.reviewBeforeInsert} onChange={(v) => void set({ reviewBeforeInsert: v })}>
         Review and edit before inserting (off = insert immediately at the cursor)
       </Toggle>

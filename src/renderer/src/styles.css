@@ -171,6 +171,7 @@ tr.dim { opacity: 0.45; }
 .meter.near i { background: var(--warn); }
 .meter.full i { background: var(--danger); }
 .keyrow { padding: var(--s2) 0; }
+.mictest { display: flex; align-items: center; gap: var(--s3); margin: var(--s2) 0 var(--s3); }
 .keyname { width: 210px; display: flex; flex-direction: column; }
 ul.plain { padding-left: 1.1rem; margin: var(--s3) 0; }
 ul.plain li { margin: var(--s2) 0; }

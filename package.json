@@ -1,6 +1,6 @@
 {
   "name": "yowly",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": true,
   "description": "Voice-first AI assistant for desktop",
   "main": "./out/main/index.js",
