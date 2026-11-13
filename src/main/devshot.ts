@@ -12,6 +12,15 @@ export async function devShots(main: BrowserWindow, pill: BrowserWindow, dir: st
     writeFileSync(join(dir, `${name}.png`), (await win.webContents.capturePage()).toPNG())
   await snap(main, 'welcome')
   await main.webContents.executeJavaScript(`document.querySelector('.welcome .btn')?.click()`)
+  if (process.env.YOWLY_SHOT_TEXT) {
+    // Fill the editor so the Dictate shot shows real content.
+    await wait(300)
+    await main.webContents.executeJavaScript(`{
+      const t = document.querySelector('textarea.editor')
+      Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype, 'value').set.call(t, ${JSON.stringify(process.env.YOWLY_SHOT_TEXT)})
+      t.dispatchEvent(new Event('input', { bubbles: true }))
+    }`)
+  }
   for (const route of ['dictate', 'history', 'models', 'usage', 'settings']) {
     await main.webContents.executeJavaScript(`location.hash = '#/${route}'`)
     await wait(500)

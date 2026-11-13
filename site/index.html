@@ -1,0 +1,267 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Yowly | Voice dictation for Windows</title>
+<meta name="description" content="Yowly is a free voice dictation app for Windows. Press a key, talk, and clean text lands at your cursor. Speech is transcribed on your own computer.">
+<meta property="og:title" content="Yowly | Voice dictation for Windows">
+<meta property="og:description" content="Press a key, talk, and clean text lands at your cursor. Free, and private by default.">
+<meta property="og:image" content="app.png">
+<meta name="theme-color" content="#ff9a2e">
+<link rel="icon" href="yowly.svg" type="image/svg+xml">
+<style>
+  :root {
+    --ink: #1b1611;
+    --muted: #6b6257;
+    --cream: #f8f4ed;
+    --card: #fffdf9;
+    --line: #e2d9cb;
+    --orange: #f26a0d;
+    --orange-text: #b34700;
+    --hero-a: #ff8a1f;
+    --hero-b: #ffbe55;
+    --wrap: 1080px;
+    --font: "Segoe UI Variable Display", "Segoe UI", -apple-system, BlinkMacSystemFont, "Helvetica Neue", system-ui, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body { margin: 0; background: var(--cream); color: var(--ink); font: 17px/1.6 var(--font); -webkit-font-smoothing: antialiased; }
+  img { display: block; max-width: 100%; height: auto; }
+  a { color: inherit; }
+  .wrap { width: min(var(--wrap), 100% - 48px); margin-inline: auto; }
+  h1, h2, h3 { margin: 0; letter-spacing: -0.03em; line-height: 1.05; font-weight: 650; }
+  h2 { font-size: clamp(2rem, 4.4vw, 3.2rem); }
+  p { margin: 0; }
+  :focus-visible { outline: 3px solid var(--ink); outline-offset: 3px; border-radius: 6px; }
+  .skip { position: absolute; left: -999px; }
+  .skip:focus { left: 16px; top: 16px; z-index: 9; background: var(--ink); color: #fff; padding: 10px 14px; border-radius: 8px; }
+
+  /* buttons */
+  .btn {
+    display: inline-flex; align-items: center; gap: 10px;
+    padding: 17px 34px; border-radius: 999px;
+    background: var(--ink); color: #fff; text-decoration: none; font-weight: 600; font-size: 1.05rem;
+    transition: transform .15s ease, box-shadow .15s ease;
+    box-shadow: 0 6px 18px rgba(27, 22, 17, .22);
+  }
+  .btn:hover { transform: translateY(-2px); box-shadow: 0 12px 26px rgba(27, 22, 17, .28); }
+  .btn:active { transform: translateY(1px); box-shadow: 0 3px 8px rgba(27, 22, 17, .25); }
+  .btn svg { transition: transform .15s ease; }
+  .btn:hover svg { transform: translateY(2px); }
+  .note { margin-top: 14px; font-size: .88rem; }
+
+  /* hero */
+  .hero {
+    position: relative; overflow: hidden;
+    min-height: 100svh; display: flex; flex-direction: column; align-items: center;
+    background:
+      radial-gradient(60% 50% at 78% 12%, rgba(255, 224, 150, .75), transparent 70%),
+      radial-gradient(55% 45% at 12% 30%, rgba(242, 89, 13, .45), transparent 70%),
+      linear-gradient(160deg, var(--hero-a), var(--hero-b));
+    text-align: center;
+  }
+  nav {
+    margin-top: 18px; display: flex; align-items: center; gap: 4px;
+    padding: 6px 8px; border-radius: 14px; background: rgba(255, 253, 249, .92);
+    box-shadow: 0 2px 10px rgba(120, 60, 0, .15);
+  }
+  nav a { padding: 7px 13px; border-radius: 9px; text-decoration: none; font-size: .9rem; font-weight: 500; transition: background .15s; }
+  nav a:hover { background: #f0e8da; }
+  nav .logo { display: flex; align-items: center; gap: 8px; font-weight: 700; padding-left: 8px; }
+  .hero h1 { margin-top: clamp(28px, 6vh, 64px); font-size: clamp(3rem, 9vw, 6.8rem); font-weight: 700; letter-spacing: -0.045em; }
+  .hero .sub { margin: 18px auto 30px; max-width: 30em; font-size: clamp(1.05rem, 1.6vw, 1.25rem); line-height: 1.45; }
+  .shot {
+    margin-top: clamp(28px, 5vh, 52px); flex: 1; min-height: 180px; width: min(980px, 100% - 48px);
+    display: flex; align-items: flex-start;
+  }
+  .shot img {
+    width: 100%; border-radius: 14px 14px 0 0; border: 1px solid rgba(27, 22, 17, .35); border-bottom: 0;
+    box-shadow: 0 30px 80px rgba(110, 45, 0, .45);
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .hero h1, .hero .sub, .hero .cta { animation: up .6s ease both; }
+    .hero .sub { animation-delay: .08s; } .hero .cta { animation-delay: .16s; }
+    .shot img { animation: up .8s .22s ease both; }
+    @keyframes up { from { opacity: 0; transform: translateY(18px); } }
+  }
+
+  /* sections */
+  section { padding: clamp(72px, 11vw, 132px) 0; }
+  .lead { margin-top: 16px; max-width: 34em; color: var(--muted); font-size: 1.1rem; }
+  .steps { margin-top: 56px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+  .step {
+    display: flex; flex-direction: column; background: var(--card); border: 1px solid var(--line);
+    border-radius: 20px; padding: 26px; transition: transform .2s ease, box-shadow .2s ease;
+  }
+  .step:hover { transform: translateY(-2px); box-shadow: 0 14px 30px rgba(80, 50, 10, .1); }
+  .step .n { font-size: .85rem; font-weight: 700; color: var(--orange-text); letter-spacing: .04em; }
+  .step h3 { margin: 10px 0 8px; font-size: 1.45rem; }
+  .step p { color: var(--muted); font-size: .98rem; }
+  .demo { margin-top: auto; padding-top: 26px; min-height: 104px; display: flex; align-items: flex-end; }
+  kbd { font: 600 .95rem var(--font); padding: 9px 13px; border-radius: 10px; background: #fff; border: 1px solid var(--line); box-shadow: 0 3px 0 var(--line); }
+  .keys { display: flex; gap: 8px; align-items: center; color: var(--muted); }
+  .pill { width: 100%; display: flex; align-items: center; gap: 12px; padding: 9px 16px 9px 10px; border-radius: 999px; background: #1c1a18; border: 1px solid var(--orange); color: #b9b1a4; font-size: .85rem; }
+  .bars { display: flex; align-items: center; gap: 3px; height: 24px; flex: 1; }
+  .bars i { width: 4px; height: 100%; border-radius: 2px; background: linear-gradient(#ffab3d, #ff6a0d); transform: scaleY(.3); }
+  @media (prefers-reduced-motion: no-preference) {
+    .bars i { animation: bar .9s ease-in-out infinite alternate; }
+    .bars i:nth-child(3n) { animation-duration: .6s; } .bars i:nth-child(4n+1) { animation-duration: 1.2s; } .bars i:nth-child(5n+2) { animation-delay: -.4s; }
+    @keyframes bar { to { transform: scaleY(1); } }
+  }
+  .clean { width: 100%; font-size: .95rem; line-height: 1.45; }
+  .clean s { color: #a59b8c; display: block; }
+  .clean b { display: block; margin-top: 6px; font-weight: 600; }
+
+  /* privacy */
+  .split { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(32px, 6vw, 80px); align-items: center; }
+  .dark { background: #171512; color: #f1ebe2; }
+  .dark .lead { color: #b3aa9c; }
+  .dark .lead + .lead { margin-top: 12px; }
+  .toggles { list-style: none; margin: 0; padding: 8px 24px; border-radius: 20px; background: #211e1a; border: 1px solid #36322d; }
+  .toggles li { display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 17px 0; border-bottom: 1px solid #36322d; }
+  .toggles li:last-child { border: 0; }
+  .sw { flex: none; min-width: 52px; text-align: center; padding: 4px 10px; border-radius: 999px; font-size: .8rem; font-weight: 700; background: #36322d; color: #b3aa9c; }
+  .sw.on { background: linear-gradient(135deg, #ff6a0d, #ffab3d); color: #1b1206; }
+
+  /* agents */
+  .chips { margin-top: 30px; display: flex; flex-wrap: wrap; gap: 10px; }
+  .chip { padding: 9px 17px; border-radius: 999px; background: var(--card); border: 1px solid var(--line); font-size: .95rem; }
+  .facts { margin-top: 44px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+  .facts div { border-top: 2px solid var(--ink); padding-top: 14px; }
+  .facts b { display: block; font-size: 1.2rem; letter-spacing: -0.02em; }
+  .facts span { color: var(--muted); font-size: .96rem; }
+
+  /* close + footer */
+  .close { text-align: center; background: linear-gradient(160deg, var(--hero-a), var(--hero-b)); }
+  .close img { margin: 0 auto 18px; }
+  .close h2 { margin-bottom: 30px; }
+  footer { padding: 26px 0; font-size: .88rem; color: var(--muted); }
+  footer .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+
+  /* On wide screens the hero is exactly one screen and the app window is cropped at the fold. */
+  @media (min-width: 821px) and (min-height: 620px) {
+    .hero { height: 100svh; }
+    .shot { min-height: 0; }
+  }
+  @media (max-width: 820px) {
+    .steps, .split, .facts { grid-template-columns: 1fr; }
+    nav a:not(.logo):not(.keep) { display: none; }
+    .hero h1 span { display: block; }
+    .hero h1, .hero .sub { padding-inline: 24px; }
+    .btn { padding: 16px 26px; }
+  }
+</style>
+</head>
+<body>
+<a class="skip" href="#how">Skip to content</a>
+
+<header class="hero">
+  <nav aria-label="Main">
+    <a class="logo" href="#"><img src="yowly.svg" width="24" height="24" alt="">Yowly</a>
+    <a href="#how">How it works</a>
+    <a href="#privacy">Privacy</a>
+    <a href="#agents">Agents</a>
+    <a class="keep" href="https://github.com/atrenatocruz/yowly">GitHub</a>
+  </nav>
+  <h1><span>Talk.</span> <span>Yowly types.</span></h1>
+  <p class="sub">Free voice dictation for Windows. Press a key, speak, and clean text lands wherever your cursor is.</p>
+  <div class="cta">
+    <a class="btn" href="https://github.com/atrenatocruz/yowly/releases/latest">
+      Download Yowly for free
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2v10M3.5 8 8 12.5 12.5 8"/></svg>
+    </a>
+    <p class="note">For Windows. Early preview, version 0.1.</p>
+  </div>
+  <div class="shot"><img src="app.png" width="1080" height="740" alt="The Yowly window with a dictated email in the editor, transformation buttons and a model picker below it"></div>
+</header>
+
+<main>
+  <section id="how">
+    <div class="wrap">
+      <h2>Three steps from thought to text</h2>
+      <p class="lead">Yowly lives in your tray and works in any app: email, chat, documents, code editors.</p>
+      <div class="steps">
+        <article class="step">
+          <span class="n">01</span>
+          <h3>Press the hotkey</h3>
+          <p>One shortcut, anywhere on your desktop. Tap to toggle, or hold it down to talk.</p>
+          <div class="demo"><div class="keys"><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>Space</kbd></div></div>
+        </article>
+        <article class="step">
+          <span class="n">02</span>
+          <h3>Say it out loud</h3>
+          <p>A small pill shows Yowly is listening. Your speech is transcribed on your own computer.</p>
+          <div class="demo">
+            <div class="pill">
+              <img src="yowly.svg" width="38" height="38" alt="">
+              <div class="bars" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+              Listening
+            </div>
+          </div>
+        </article>
+        <article class="step">
+          <span class="n">03</span>
+          <h3>Get clean text</h3>
+          <p>Fillers and stutters are removed, capitals and full stops added. Then it is pasted at your cursor.</p>
+          <div class="demo">
+            <p class="clean"><s>um so i think uh we should ship it</s><b>So I think we should ship it.</b></p>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section id="privacy" class="dark">
+    <div class="wrap split">
+      <div>
+        <h2>Your voice stays on your computer</h2>
+        <p class="lead">Yowly transcribes with a speech model that runs on your own machine. Audio is never saved, and nothing is uploaded unless you switch a cloud option on yourself.</p>
+        <p class="lead">These are the settings Yowly starts with.</p>
+      </div>
+      <ul class="toggles" aria-label="Default settings">
+        <li>Transcribe on this device <span class="sw on">On</span></li>
+        <li>Cloud transcription <span class="sw">Off</span></li>
+        <li>Cloud AI models <span class="sw">Off</span></li>
+        <li>Usage analytics <span class="sw">Off</span></li>
+        <li>Monthly spending cap <span class="sw on">$5</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <section id="agents">
+    <div class="wrap">
+      <h2>Then hand the text to an agent</h2>
+      <p class="lead">Turn a rough dictation into something ready to send. Pick a transformation, or write your own instruction.</p>
+      <div class="chips" aria-label="Built-in transformations">
+        <span class="chip">Polish</span><span class="chip">Professional email</span><span class="chip">Bullet summary</span><span class="chip">Make concise</span><span class="chip">Translate to Spanish</span>
+      </div>
+      <div class="facts">
+        <div><b>Six free models</b><span>Through OpenRouter, with a free account key.</span></div>
+        <div><b>Bring your own keys</b><span>OpenAI, Anthropic, Gemini and Groq, or Ollama for fully local models.</span></div>
+        <div><b>Cost shown first</b><span>Paid models show an estimate before they run and stop at your monthly cap.</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="close">
+    <div class="wrap">
+      <img src="yowly.svg" width="96" height="96" alt="Yowly, an orange owl with a waveform crest">
+      <h2>Give your keyboard a rest</h2>
+      <a class="btn" href="https://github.com/atrenatocruz/yowly/releases/latest">
+        Download Yowly for free
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2v10M3.5 8 8 12.5 12.5 8"/></svg>
+      </a>
+      <p class="note">For Windows. A macOS version is planned.</p>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>Yowly 0.1, an early preview.</span>
+    <a href="https://github.com/atrenatocruz/yowly">Source on GitHub</a>
+  </div>
+</footer>
+</body>
+</html>

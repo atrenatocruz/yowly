@@ -28,3 +28,11 @@ npm run dev
 | `src/main` | Electron shell: hotkeys, insertion, keychain, storage, orchestration |
 | `src/renderer` | React UI, mascot, recording pill, on-device Whisper worker |
 | `docs` | Product brief, design system, architecture and plan, security checklist |
+
+## Website
+
+The download page lives in `site/` and is served by GitHub Pages from the `gh-pages` branch. To publish changes:
+
+```bash
+git subtree push --prefix site origin gh-pages
+```
