@@ -280,7 +280,7 @@ function state() {
     models: models(),
     keys: Object.fromEntries(Object.keys(keys).map((p) => [p, true])),
     canPaste: !!hook,
-    hotkeyOk,
+    hotkeyOk: hotkeyOk || !!process.env.YOWLY_SHOT, // smoke-check shots may run beside the installed app
     platform: process.platform,
   }
 }

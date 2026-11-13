@@ -55,9 +55,9 @@ Tag (Free / Local / Paid / BYO key) · Tile · Meter · Table · List item · Di
 
 ## Mascot: Yowly the owl
 
-**Concept.** A compact, round owl. Its crest is five rounded bars, a voice waveform, so the brand idea (speech becomes clear thought) is in the silhouette. Big eyes in a dark mask carry all expression. A small waveform mark sits on the chest.
+**Concept.** A compact, round owl. Its crest is five rounded bars, a voice waveform, so the brand idea (speech becomes clear thought) is in the silhouette. Big glossy eyes on a soft cream face carry all expression. Blush cheeks keep it warm. A small waveform mark sits on the chest.
 
-**Shape rules.** Rounded-square body, two soft ear tufts, crest between them. Orange gradient body, dark neutral mask, cream eyes. Two colors plus neutrals. No outlines, no gloss, so it stays legible at 16 px.
+**Shape rules.** Rounded body, two small soft ear tufts, crest between them. Orange gradient body, cream face disc, large dark pupils with a white highlight, pink cheeks. No outlines and no dark mask, so it reads friendly and stays legible at 16 px.
 
 **States**
 
@@ -66,7 +66,7 @@ Tag (Free / Local / Paid / BYO key) · Tile · Meter · Table · List item · Di
 | Idle / sleeping | closed, relaxed arcs | low, still | small fading "z" |
 | Listening | wide, large pupils | bouncing with the voice | pill border turns orange |
 | Thinking | pupils up and to the side | slow wave | two rising dots |
-| Transcribing | half-lidded, looking down | fast wave | sound arcs at both sides |
+| Transcribing | looking down, flat focused brows | fast wave | sound arcs at both sides |
 | Success | happy upward arcs | full height | one small hop |
 | Error | worried brows, looking down | drooped | desaturated, never red |
 
